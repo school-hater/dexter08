@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>dexter08</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;color:#e8eaed;font:14px/1.5 system-ui,Segoe UI,Roboto,sans-serif;overflow:hidden}
+button{font:inherit;cursor:pointer;color:inherit}
+a{color:inherit;cursor:pointer}
+[hidden]{display:none!important}
+#title{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#1a0d0d 0%,#000 70%);z-index:50;text-align:center;padding:20px;overflow:auto}
+.tl h1{font:700 clamp(44px,12vw,110px)/1 "Courier New",monospace;margin:0;letter-spacing:.04em;color:#e8e0c8;animation:gl 4s infinite;text-shadow:2px 0 #a22,-2px 0 #226}
+@keyframes gl{0%,92%,100%{transform:none;text-shadow:2px 0 #a22,-2px 0 #226}93%{transform:translate(4px,-2px) skewX(6deg);text-shadow:-6px 0 #a22,6px 0 #0aa}95%{transform:translate(-5px,1px);text-shadow:6px 0 #a22,-6px 0 #0aa}}
+.tl p{color:#9a948a;margin:.4em 0}
+.tl input{background:#111;border:1px solid #444;color:#eee;padding:10px 12px;border-radius:6px;width:240px;text-align:center;margin:10px 0}
+.tbtn{display:block;margin:10px auto;background:#1b1111;border:1px solid #6a2a2a;padding:12px 26px;border-radius:6px;min-width:260px;color:#eadfcf;font-size:16px}
+.tbtn:hover{background:#2a1515}
+.warn{font-size:12px;max-width:440px;margin:18px auto 0!important;color:#6d675e!important}
+#tend{margin-top:16px;letter-spacing:.3em;color:#7a3a3a}
+#tend span{opacity:.25;margin:0 8px;font-size:20px}#tend span.on{opacity:1;color:#c33}
+#browser{position:fixed;inset:0;display:flex;flex-direction:column;background:#202124}
+#tabs{display:flex;gap:2px;background:#101113;padding:6px 6px 0;overflow:hidden;min-height:36px}
+.tab{display:flex;align-items:center;gap:6px;background:#292a2d;border-radius:8px 8px 0 0;padding:6px 8px 6px 12px;max-width:220px;min-width:60px;flex:0 1 200px;font-size:12px;color:#aaa;cursor:pointer}
+.tab.on{background:#35363a;color:#fff}
+.tab span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1}
+.tab b{font-weight:400;opacity:.6;padding:0 4px;border-radius:50%}.tab b:hover{background:#555}
+#ntab{background:none;border:0;color:#999;font-size:18px;padding:0 10px}
+#bar{display:flex;gap:6px;padding:6px 8px;background:#35363a;align-items:center}
+#bar button{background:#2a2b2e;border:0;border-radius:6px;padding:5px 9px;color:#ddd}
+#bar button:hover{background:#44464b}
+#url{flex:1;min-width:0;background:#202124;border:1px solid #3c3d40;border-radius:16px;color:#ddd;padding:6px 14px;font:13px "Courier New",monospace}
+#tray{display:flex;gap:10px;align-items:center;font-size:12px;color:#aaa;padding:0 6px;white-space:nowrap}
+#led{width:9px;height:9px;border-radius:50%;background:#2a2a2a}#led.on{background:#3f3;box-shadow:0 0 8px #3f3}
+#bm{display:flex;gap:4px;background:#35363a;padding:0 8px 6px;border-bottom:1px solid #111;overflow:auto}
+#bm a{background:#2a2b2e;padding:3px 10px;border-radius:12px;font-size:12px;white-space:nowrap;color:#ccc}
+#bm a:hover{background:#44464b}#bm em{background:#a22;border-radius:8px;padding:0 6px;font-style:normal;margin-left:4px;font-size:11px}
+#main{flex:1;display:flex;min-height:0;position:relative}
+#view{flex:1;overflow:auto;background:#fff;color:#111;position:relative}
+#side{width:350px;background:#16171a;border-left:1px solid #000;display:flex;flex-direction:column;color:#ddd}
+.stabs{display:flex;background:#0e0f11}.stabs button{flex:1;background:none;border:0;padding:9px 4px;color:#888;border-bottom:2px solid transparent}.stabs button.on{color:#fff;border-color:#c33}
+.sbody{flex:1;overflow:auto;padding:12px;font-size:13px}
+.sbody h4{margin:14px 0 6px;color:#c88;font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+.clue{background:#1f2024;border-left:3px solid #a33;padding:6px 8px;margin:6px 0;border-radius:3px}.clue small{color:#888;display:block}
+.sbody textarea,.sbody input[type=text]{width:100%;background:#0e0f11;border:1px solid #333;color:#ddd;border-radius:4px;padding:8px;font:13px "Courier New",monospace}
+.sbody pre{white-space:pre-wrap;background:#0e0f11;padding:8px;border-radius:4px;color:#8f8;margin:6px 0;font:13px "Courier New",monospace}
+.btn{background:#2a1a1a;border:1px solid #6a2a2a;padding:5px 12px;border-radius:5px}.btn:hover{background:#3a2020}
+@media(max-width:800px){#side{position:absolute;inset:0;width:auto;z-index:5}.tab{flex-basis:90px}#tray{display:none}}
+/* sites */
+.pad{padding:18px}
+.vt{background:#0f0f10;color:#eee;min-height:100%}
+.vth{display:flex;gap:10px;align-items:center;padding:10px 16px;background:#181819;border-bottom:1px solid #2a2a2c;position:sticky;top:0;z-index:3}
+.logo{font-weight:700;font-size:18px;text-decoration:none}.logo b{color:#e33}
+.vth input{flex:1;max-width:420px;background:#0f0f10;border:1px solid #333;color:#eee;border-radius:18px;padding:6px 14px}
+.vth button{background:#222;border:0;border-radius:50%;width:32px;height:32px}.sp{flex:1}
+.chip{background:#222;padding:4px 12px;border-radius:14px;font-size:12px;text-decoration:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.card{display:block;text-decoration:none;color:#eee}.card.dim{opacity:.55}
+.th{aspect-ratio:16/9;border-radius:8px;position:relative;overflow:hidden;margin-bottom:6px;border:1px solid #222}
+.th .dur{position:absolute;right:6px;bottom:6px;background:#000c;padding:0 5px;border-radius:3px;font-size:11px}
+.th i{position:absolute;left:0;bottom:0;height:3px;background:#e33}
+.th .nw{position:absolute;left:6px;top:6px;background:#e33;font-size:10px;padding:0 5px;border-radius:3px;font-weight:700}
+.card small{display:block;color:#999;font-size:12px}
+.banner{height:120px;background:linear-gradient(110deg,#200,#511 40%,#111);position:relative;overflow:hidden}
+.banner:after{content:"";position:absolute;right:10%;bottom:0;width:30px;height:100px;background:#000;border-radius:14px 14px 0 0;opacity:.7}
+.chead{display:flex;gap:16px;align-items:center;padding:16px}.av{width:72px;height:72px;border-radius:50%;background:#000;border:2px solid #411;display:flex;align-items:center;justify-content:center;font-size:30px}
+.subbtn{background:#eee;color:#111;border:0;border-radius:18px;padding:7px 18px;font-weight:700}
+.wrap2{display:flex;gap:20px;padding:16px;flex-wrap:wrap}.wrap2 .mn{flex:1 1 560px;min-width:0}.wrap2 .rel{flex:0 0 280px}
+#pw{position:relative;background:#000;border-radius:8px;overflow:hidden}
+#cv{width:100%;display:block;aspect-ratio:16/9;background:#000;cursor:pointer}
+#cap{position:absolute;left:0;right:0;bottom:46px;text-align:center;padding:0 10px;pointer-events:none}
+#cap span{background:#000b;padding:2px 8px;font-size:15px;color:#fff;line-height:1.9}
+#ctl{display:flex;gap:8px;align-items:center;background:#111;padding:6px 10px}
+#ctl button{background:#222;border:0;border-radius:4px;padding:4px 10px}#ctl #dc{background:#4a1515}
+#sk{flex:1;accent-color:#e33}
+#tm{font:12px "Courier New",monospace;color:#bbb}
+#over{position:absolute;inset:0;background:#000c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:10px}
+.meta{color:#999;margin:6px 0}.edit{border-bottom:1px dotted #a55;cursor:pointer}
+.desc{background:#181819;padding:10px 12px;border-radius:8px;margin:10px 0}
+.hid{color:#181819}.reader .hid{color:#f66;background:#300;outline:1px dashed #f66;cursor:pointer}
+.cm{display:flex;gap:10px;margin:12px 0}.cm .a{width:34px;height:34px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;flex:none}
+.cm a.u{font-weight:600;text-decoration:none}.cm small{color:#888}.ts{color:#6af;cursor:pointer}
+.reply{display:flex;gap:6px;margin:8px 0 0 44px}.reply input{flex:1;background:#0f0f10;border:1px solid #444;color:#eee;padding:6px 10px;border-radius:14px}
+.docb{background:#4a1515;color:#fff;border:0;padding:6px 12px;border-radius:5px;margin:8px 0}
+.err{text-align:center;padding:60px 20px}
+.mb{background:#f6f8fc;min-height:100%;color:#222}.mb .hd{background:#fff;border-bottom:1px solid #dde;padding:12px 18px;font-weight:700;color:#255}
+.mrow{display:flex;gap:12px;padding:10px 18px;border-bottom:1px solid #e4e8f0;background:#fff;text-decoration:none;color:#222}.mrow.un{font-weight:700}.mrow:hover{background:#eef3ff}.mrow .f{width:160px;flex:none}
+.mbody{background:#fff;margin:14px;padding:18px 22px;border:1px solid #dde;border-radius:6px;max-width:760px}
+.wv{background:#f3ecd8;color:#2a2418;font-family:Georgia,serif;min-height:100%}
+.wv .hd{background:#2a2418;color:#f3ecd8;padding:12px 20px;font-size:20px;letter-spacing:.1em}
+.wv .in{max-width:760px;margin:0 auto;padding:20px}.wv input{padding:8px;width:70%;border:1px solid #8a7a50;background:#fffaf0}.wv button{padding:8px 14px}
+.wv .res{margin:14px 0;border-bottom:1px solid #cdbf98;padding-bottom:10px}.wv .res a{font-size:18px;color:#1a3a7a;text-decoration:underline}
+.ab{background:#171323;color:#d8d2ea;min-height:100%}.ab .hd{background:#241c3a;padding:12px 20px;font-weight:700;letter-spacing:.1em}
+.ab .in{max-width:780px;margin:0 auto;padding:18px}.post{background:#201a33;border-radius:6px;padding:12px 14px;margin:10px 0}.post b{color:#b9a6ff}
+.trow{display:block;padding:10px 14px;background:#201a33;margin:6px 0;border-radius:6px;text-decoration:none}.trow small{color:#887fa3}
+.nt{background:#fff;color:#333;text-align:center;padding:60px 20px;min-height:100%}.nt .gr{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}.nt .gr a{background:#f0f0f4;padding:20px 26px;border-radius:12px;text-decoration:none}
+.form{max-width:340px;margin:50px auto;background:#181819;padding:20px;border-radius:10px}.form input{width:100%;margin:6px 0 12px;padding:8px;background:#0f0f10;border:1px solid #444;color:#eee;border-radius:6px}
+/* video / fx */
+#vig{position:fixed;inset:0;pointer-events:none;z-index:80;background:radial-gradient(ellipse at center,transparent 45%,#000 140%);opacity:0;transition:opacity 2s}
+#flick{position:fixed;inset:0;background:#000;pointer-events:none;z-index:90;opacity:0}
+#toasts{position:fixed;top:92px;right:14px;z-index:95;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:320px}
+.toast{background:#111e;border-left:3px solid #c33;padding:8px 12px;border-radius:4px;color:#eee;animation:ti .3s;font-size:13px}
+@keyframes ti{from{opacity:0;transform:translateX(30px)}}
+.peek{position:fixed;bottom:0;width:70px;height:260px;background:#000;border-radius:35px 35px 0 0;z-index:70;pointer-events:none;animation:pk 1.6s forwards;box-shadow:0 0 18px #000}
+.peek:before{content:"";position:absolute;top:-34px;left:18px;width:34px;height:46px;background:#000;border-radius:50%}
+@keyframes pk{0%{opacity:0}15%{opacity:.95}80%{opacity:.95}100%{opacity:0}}
+.gc{position:fixed;z-index:85;pointer-events:none;font-size:20px;color:#fff;text-shadow:0 0 3px #000;transition:all 1.4s ease-in-out}
+#crash{position:fixed;inset:0;background:#f1f3f4;color:#5f6368;z-index:200;display:flex;align-items:center;justify-content:center;text-align:center;font-family:Arial,sans-serif}
+#crash .sad{font-size:90px;transform:rotate(90deg);display:inline-block}#crash h2{color:#202124}
+#crash button{background:#1a73e8;color:#fff;border:0;padding:8px 20px;border-radius:4px;margin-top:10px}
+#finale,#ending{position:fixed;inset:0;background:#000;z-index:60;color:#ddd}
+#fc{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#ftx{position:absolute;left:0;right:0;top:12%;text-align:center;padding:0 20px;text-shadow:0 0 6px #000}
+#ftx p{margin:8px 0;font-size:clamp(15px,2.4vw,22px);animation:fi 1.5s}
+@keyframes fi{from{opacity:0}}
+#fclk{position:absolute;top:14px;right:18px;font:20px "Courier New",monospace;color:#c33}
+#fopt{position:absolute;left:0;right:0;bottom:6%;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;padding:0 10px}
+#fopt button{background:#000c;border:1px solid #888;color:#eee;padding:12px 22px;border-radius:5px;font-size:16px;animation:fi 2s}
+#fopt button:hover{background:#400;border-color:#c33}
+#hold{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;user-select:none;touch-action:none;cursor:pointer;text-align:center;padding:20px}
+#hcnt{font:90px "Courier New",monospace;color:#2a1111}#hbar{width:60%;height:4px;background:#1a1a1a}#hbar i{display:block;height:100%;background:#622;width:0}
+.ec{max-width:620px;margin:0 auto;padding:60px 22px;height:100%;overflow:auto}
+.et{font:700 clamp(26px,5vw,40px) "Courier New",monospace;color:#c33;letter-spacing:.05em}.es{color:#777;margin-bottom:26px}
+.ec p{opacity:0;animation:fi 2s forwards;font-size:16px;line-height:1.7}
+.eb{opacity:0;animation:fi 2s forwards;margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}.eb button{background:#1b1111;border:1px solid #6a2a2a;padding:10px 18px;border-radius:5px}
+.chan{background:#111;border:1px solid #333;padding:14px;border-radius:8px;margin-top:16px}
+</style>
+</head>
+<body>
+<div id="title"><div class="tl">
+<h1>dexter08</h1>
+<p>an ARG investigation game &middot; about an hour &middot; saves automatically</p>
+<div id="tmenu"></div>
+<p class="warn">Headphones recommended. Contains sudden loud sounds, brief flickering, and unsettling themes. Spoken whispers use your browser's text-to-speech. Add <code>?fast</code> to the URL to run timers 8x faster.</p>
+<div id="tend"></div>
+</div></div>
+<div id="browser" hidden>
+<div id="tabs"></div>
+<div id="bar"><button id="bk">&#9664;</button><button id="fw">&#9654;</button><button id="rl">&#10227;</button><input id="url" spellcheck="false" autocomplete="off"><button id="rd" title="Reader mode: reveals hidden page text">&#128214;</button><button id="mute">&#128266;</button><button id="cf">&#128211; Case File</button><span id="tray"><span id="led" title="camera"></span><span id="clock"></span></span></div>
+<div id="bm"></div>
+<div id="main"><div id="view"></div><aside id="side" hidden></aside></div>
+</div>
+<div id="finale" hidden></div>
+<div id="ending" hidden></div>
+<div id="vig"></div><div id="flick"></div><div id="toasts"></div>
+<script>
+(()=>{'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const fmtH=s=>{s=Math.floor(s);return String(Math.floor(s/3600)).padStart(2,'0')+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const FAST=/[?&]fast/.test(location.search),SPD=FAST?8:1;
+const KEY='dexter08_save_v1',EKEY='dexter08_endings_v1',MKEY='dexter08_mute';
+let S=null,P=null,FIN=null,TICK=null,MUTE=false,SIDE={open:false,tab:'ev'},TG=null;
+try{MUTE=localStorage.getItem(MKEY)==='1'}catch(e){}
+const nm=s=>String(s).replace(/\{NAME\}/g,S?S.name:'Reporter');
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function loadSave(){try{const j=localStorage.getItem(KEY);return j?JSON.parse(j):null}catch(e){return null}}
+function endings(){try{return JSON.parse(localStorage.getItem(EKEY)||'{}')}catch(e){return{}}}
+function addEnding(n){const e=endings();e[n]=1;try{localStorage.setItem(EKEY,JSON.stringify(e))}catch(x){}}
+const fresh=name=>({v:1,name,playSec:0,tabs:[{h:['mailbox.com/m/m1'],i:0}],cur:0,clues:{},watch:{},done:{},ev:{},due:{},read:{},mailAt:{},f:{},notes:'',dread:5,finale:false});
+
+/* ---------- audio ---------- */
+const A={ctx:null,box_:null,bi:0,
+init(){if(this.ctx){if(this.ctx.state==='suspended')this.ctx.resume();return}
+try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const x=this.ctx=new C();const m=this.m=x.createGain();m.gain.value=MUTE?0:.9;m.connect(x.destination);
+const g=this.dg=x.createGain();g.gain.value=0;const f=this.df=x.createBiquadFilter();f.type='lowpass';f.frequency.value=160;
+[44,44.8,66.3].forEach(fr=>{const o=x.createOscillator();o.type='sawtooth';o.frequency.value=fr;o.connect(f);o.start()});
+f.connect(g);g.connect(m);
+const b=this.nb=x.createBuffer(1,x.sampleRate*2,x.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+this.dread(S?S.dread:5)}catch(e){}},
+dread(d){if(!this.ctx)return;const t=this.ctx.currentTime;this.dg.gain.setTargetAtTime(.015+d/100*.07,t,1.5);this.df.frequency.setTargetAtTime(120+d*4,t,1.5)},
+mute(on){if(this.m)this.m.gain.value=on?0:.9;if(on){try{speechSynthesis.cancel()}catch(e){}}},
+tone(f,d=.2,type='sine',v=.08,at=0){if(!this.ctx)return;try{const x=this.ctx,o=x.createOscillator(),g=x.createGain(),t=x.currentTime+at;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(this.m);o.start(t);o.stop(t+d+.05)}catch(e){}},
+noise(d=.3,v=.15,fq=800,type='highpass'){if(!this.ctx)return;try{const x=this.ctx,s=x.createBufferSource(),g=x.createGain(),f=x.createBiquadFilter();s.buffer=this.nb;f.type=type;f.frequency.value=fq;g.gain.setValueAtTime(v,x.currentTime);g.gain.exponentialRampToValueAtTime(.0001,x.currentTime+d);s.connect(f);f.connect(g);g.connect(this.m);s.start();s.stop(x.currentTime+d+.05)}catch(e){}},
+sting(){this.noise(.7,.3,300,'lowpass');this.tone(55,1.4,'sawtooth',.12);this.tone(58,1.4,'sawtooth',.1);this.tone(1900,.5,'square',.02)},
+thump(){this.tone(62,.3,'sine',.4);this.noise(.12,.25,200,'lowpass')},
+knock(n){for(let i=0;i<n;i++)setTimeout(()=>this.thump(),i*380)},
+creak(){this.tone(170,.9,'sawtooth',.03);this.tone(190,.9,'sawtooth',.025,.1)},
+box(on){clearInterval(this.box_);this.box_=null;if(!on)return;const seq=[659,784,988,880,784,659,587,659,523,659,784,659,587,494,523,0];this.box_=setInterval(()=>{const f=seq[this.bi++%seq.length];if(f)this.tone(f,1.3,'triangle',.05)},520)},
+say(t,pitch=.15,rate=.6,vol=.7){if(MUTE)return;try{const u=new SpeechSynthesisUtterance(nm(t));u.pitch=pitch;u.rate=rate;u.volume=vol;speechSynthesis.speak(u)}catch(e){}}};
+
+/* ---------- content ---------- */
+const mk=(n,h)=>`linear-gradient(${h%360}deg,hsl(${h},30%,${n}%),#000)`;
+const VL=[
+{id:'v1',title:'NEW CAMCORDER!!! (unboxing)',date:'Sep 12, 2009',views:'38 views',dur:110,stamp:'09/12/2009',clock:'15:08:41',edited:'Oct 9, 2026',th:mk(22,30),
+desc:'it came in the mail!!! mom says dont drop it. <span class="hid" data-c="h1">the camera was already on when i opened the box</span>',
+scenes:[[0,'room',{}],[60,'hall',{lens:1}],[66,'room',{}]],
+dg:[[18,22,'10/31/2031']],
+anoms:[{id:'v1_date',t:18,d:4,txt:'The date stamp glitches to 10/31/2031, twenty-two years in the future.'},
+{id:'v1_lens',t:60,d:6,txt:'In the reflection of the camera lens, a tall figure stands in the hallway behind Dexter.'},
+{id:'v1_voice',t:95,d:6,txt:'Dexter says his mom is not home. A woman answers "I\'m right here" from inside the closet.'}],
+figs:[[60,66,320,.5,.7,238]],
+caps:[[0,8,'okay is it on? it says REC. hi!!'],[8,22,"this is my new camcorder. it's silver and it beeps"],[22,40,'[kid giggles]'],[40,58,'mom says i can only film nice things'],[58,66,'what is that in the glass...'],[66,84,"okay never mind. it's just the hall"],[84,94,'mom? ...'],[94,102,"mom isn't home."],[102,110,"I'm right here."]],
+sfx:[[18,'static'],[60,'sting'],[100,'say',"I'm right here.",.45,.7]]},
+{id:'v2',title:'my room!! (first real video)',date:'Sep 14, 2009',views:'41 views',dur:120,stamp:'09/14/2009',clock:'16:42:07',edited:'Oct 9, 2026',th:mk(20,200),
+desc:'hi im dexter im 9!! this is my room. mom says i can post if i dont say where we live lol <span class="hid" data-c="h2">he doesnt like the light on</span>',
+scenes:[[0,'room',{}],[38,'room',{cl:.35}],[86,'room',{cl:.35,night:1}]],
+anoms:[{id:'v2_closet',t:38,d:5,txt:'The closet door opens wider on its own while Dexter talks. Nobody touches it.'},
+{id:'v2_fig',t:86,d:5,txt:'A tall dark figure stands by the window behind Dexter. It is taller than the window frame.'}],
+figs:[[86,91,115,.85,.55]],
+caps:[[0,8,'hi!! this is my first real video'],[8,20,"this is my room. that's my bed. i have 31 stickers"],[20,36,'[kid laughs]'],[36,44,"mom says i shouldn't say where we live. so i won't"],[44,60,"that's my closet. i'm not allowed to close it all the way"],[60,76,"he doesn't like it closed"],[76,86,'...i mean the door. it gets stuck'],[86,98,'[breathing, very close to the microphone]'],[98,110,'okay bye!!'],[110,120,'...bye']],
+sfx:[[38,'creak'],[86,'sting']]},
+{id:'v3',title:'my 9th birthday!!!',date:'Sep 26, 2009',views:'67 views',dur:150,stamp:'09/26/2009',clock:'14:00:12',edited:'Oct 10, 2026',th:mk(24,340),
+desc:'THANK YOU EVERYONE FOR COMING!!! <span class="hid" data-c="h3">nine friends. nine candles. ten shadows.</span>',
+scenes:[[0,'party',{}],[25,'party',{extra:1}],[70,'party',{extra:1,out:1}],[118,'party',{extra:1,out:1}]],
+anoms:[{id:'v3_extra',t:25,d:6,txt:'Ten children are at the table. Dexter says he invited nine. The tenth has no face.'},
+{id:'v3_candles',t:70,d:5,txt:'Dexter is turning NINE. All nine candles go out before he blows.'},
+{id:'v3_rev',t:118,d:7,txt:'Under the singing, reversed audio: a voice saying "we are counting".'}],
+caps:[[0,10,'everybody sing!!'],[10,24,'[off-key singing]'],[24,40,"i invited nine friends and they're ALL here!"],[40,60,'[laughter, a chair scrapes]'],[60,70,'make a wish!!'],[70,84,"...the candles went out. i didn't even blow yet"],[84,100,'[nobody laughs]'],[100,118,'okay! cake time!'],[118,132,'[a slow voice, distorted]'],[132,150,'happy birthday to me. nine. nine.']],
+sfx:[[70,'sting'],[118,'say','we are counting',.1,.45]]},
+{id:'v4',title:'hide and seek!!',date:'Oct 3, 2009',views:'112 views',dur:180,stamp:'10/03/2009',clock:'17:26:55',edited:'Oct 11, 2026',th:mk(16,0),
+desc:'playing with the new camera!! mom is in the kitchen. i count. <span class="hid" data-c="h4">he is counting too</span>',
+scenes:[[0,'hall',{}],[100,'hall',{lights:1}],[148,'hall',{lights:1,open:1}]],
+flash:[[34,35.6,'L',110,225],[72,73.6,'A',160,150],[109,110.6,'R',90,262],[141,142.6,'C',190,190],[166,167.6,'H',120,120]],
+anoms:[{id:'v4_L',t:34,d:2,txt:'A faint letter "L" is written on the wall for a moment. (0:34)'},{id:'v4_A',t:72,d:2,txt:'A faint letter "A" flashes on the wall. (1:12)'},{id:'v4_R',t:109,d:2,txt:'A faint letter "R" flashes on the wall. (1:49)'},{id:'v4_C',t:141,d:2,txt:'A faint letter "C" flashes on the wall. (2:21)'},{id:'v4_H',t:166,d:2,txt:'A faint letter "H" flashes on the wall. (2:46)'},
+{id:'v4_eight',t:172,d:6,txt:'Dexter counts to eight and stops. He never says nine. Something answers "ready or not".'}],
+figs:[[142,152,320,.32,.35,236],[152,172,320,.55,.5,250],[172,180,320,1.1,.8,300]],
+caps:[[0,8,'okay okay okay. you hide. i count.'],[8,14,'one.'],[28,34,'two.'],[48,54,'three.'],[68,74,'four.'],[88,94,'five.'],[108,114,'six.'],[128,134,'seven.'],[148,154,'eight.'],[154,170,'[silence]'],[170,180,'ready or not\u2014']],
+glitch:[[170,180]],sfx:[[142,'knock',1],[172,'sting']]},
+{id:'v5',title:'dont open the closet',date:'Oct 5, 2009',views:'9,402 views',dur:150,stamp:'10/05/2009',clock:'03:02:18',edited:'Oct 11, 2026',th:mk(10,260),
+desc:'<b>Uploaded two days after Dexter Halloran vanished.</b> <span class="hid" data-c="h5">if you are watching this, you are the film</span>',
+scenes:[[0,'room',{night:1,tally:1}],[40,'room',{night:1,tally:1,cl:.2}],[118,'room',{night:1,tally:1,cl:.2,eyes:1}]],
+anoms:[{id:'v5_film',t:45,d:7,txt:'Whispering, Dexter says: "If I film him he stays." The camera is what keeps it here.'},
+{id:'v5_tally',t:85,d:7,txt:'Tally marks are scratched on the closet door. Eight strokes, seven crossed out.'},
+{id:'v5_eyes',t:118,d:7,txt:'Two pale eyes in the gap of the closet door, level with a very tall head.'}],
+caps:[[0,12,'[whispering] it is 3 AM'],[12,30,"i'm not supposed to be up. but he's up too"],[30,44,'[scratching]'],[44,58,'if i film him he stays. so i keep filming.'],[58,80,"mom doesn't answer anymore. nobody does."],[80,98,'[scratching stops]'],[98,116,'he made a list. it keeps getting longer'],[116,132,'[wet breathing]'],[132,150,"don't open the closet. don't open it."]],
+sfx:[[30,'creak'],[118,'sting'],[132,'knock',2]]},
+{id:'v6',title:'dexter02 \u2014 the last tape (re-upload)',date:'Apr 19, 2011',views:'1 view',dur:180,stamp:'04/19/2011',clock:'22:14:02',edited:'Oct 11, 2026',th:mk(18,120),
+desc:'Re-uploaded last night. <span class="hid" data-c="h6">he took the camera when i stopped holding it</span>',
+scenes:[[0,'room',{night:1}],[100,'room',{night:1,cl:.5}],[140,'room',{night:1,cl:.8,eyes:1}]],
+anoms:[{id:'v6_name',t:2,d:8,txt:'The speaker is Marcus Veil, "dexter02", April 2011: a skeptic who came to debunk the Halloran channel, then took it over.'},
+{id:'v6_list',t:62,d:8,txt:'Marcus found a list of usernames in the closet: dexter01 to dexter08. Each took over after the last disappeared.'},
+{id:'v6_thread',t:100,d:8,txt:'Marcus hid the rules in a forum thread, encrypted so IT could not read them.'}],
+figs:[[148,160,480,.9,.4]],
+caps:[[0,10,'Testing. Marcus Veil. April nineteenth. Larch Lane.'],[10,26,"Third night in this house. I came to debunk the Halloran channel. I'm a skeptic. I was."],[26,45,"It doesn't hurt anyone. It just watches. And it needs someone to watch back."],[45,62,"Every upload I make says one view. I'm the only viewer. I checked."],[62,80,'There is a list in the closet. Usernames. Crossed out. Mine is next.'],[80,100,'I think it picks whoever keeps documenting. Writing it all down feeds it.'],[100,120,"I put the rules in a thread. Encrypted. If it can read them it'll remove them."],[120,140,"If you're watching this, you've already been counted."],[140,160,"There's a knock. Not the door. The closet."],[160,180,'[the camera falls. static.]']],
+glitch:[[160,180]],sfx:[[140,'knock',2],[160,'sting']]},
+{id:'v7',title:'basement tape (dexter07)',date:'Aug 30, 2024',views:'1 view',dur:240,stamp:'08/30/2024',clock:'01:12:33',edited:'Oct 12, 2026',th:mk(14,60),
+desc:'Cole Brandt, dexter07. If this is the last upload, I tried. <span class="hid" data-c="h7">the wall changes when no one is looking</span>',
+scenes:[[0,'basement',{wall:0}],[60,'basement',{wall:1}],[205,'basement',{wall:2}]],
+anoms:[{id:'v7_wall',t:60,d:8,txt:'The chalk wall lists dexter01 to dexter07, crossed out. Below it, dexter08 appears in fresh chalk.'},
+{id:'v7_count',t:130,d:8,txt:'Cole mutters about the viewer count: "Seven thousand. No. One. Always one." The channel has one viewer.'},
+{id:'v7_name',t:205,d:10,txt:'The wall now reads dexter09 and, beneath it, your name: {NAME}.'}],
+caps:[[0,14,'Cole Brandt. dexter07. Day nine in the house.'],[14,40,"I've read everything. The thread, the news, Marcus's tape."],[40,60,'The wall is chalk. I did not write on it.'],[60,86,'Seven names. Crossed out. And now an eighth.'],[86,120,"I haven't slept. The camera light never goes off."],[120,150,"It's counting me. Every second I document, it counts."],[150,180,'[tapping from the ceiling]'],[180,205,"I'm going to look at it. Rule two says don't. I'm going to."],[205,225,'The wall is writing again.'],[225,240,'[static]']],
+glitch:[[225,240]],sfx:[[60,'sting'],[205,'knock',3],[225,'sting']]},
+{id:'v8',title:'hi {NAME}',date:'Today',views:'1 view',dur:180,stamp:'10/12/2026',clock:'23:51:00',edited:'just now',th:mk(14,0),
+desc:'<span class="hid" data-c="h8">you are not the first to read this.</span>',
+scenes:[[0,'screen',{}],[120,'cam',{fig:.35}],[145,'cam',{fig:.8}],[165,'cam',{fig:1,close:1}]],
+anoms:[{id:'v8_screen',t:20,d:10,txt:'The video is a screen recording of your own browser, live, with your cursor and your open tabs.'},
+{id:'v8_cam',t:125,d:12,txt:'The footage cuts to your webcam: you at your desk, and a tall figure standing behind you.'}],
+caps:[[0,12,'hi {NAME}.'],[12,28,'you found the house. you found marcus. you found cole.'],[28,45,'you wrote it all down. thank you.'],[45,62,"it's quiet here. nobody ever stays to talk."],[62,80,"you don't have to answer. but you could."],[80,100,'i like how you tilt your head when you read.'],[100,120,'the light on your camera is green now. i am sorry. it was always green.'],[120,140,'turn around.'],[140,160,'no. not yet. look at the screen.'],[160,180,'okay. now.']],
+sfx:[[120,'sting'],[160,'say','{NAME}',.1,.5],[172,'sting']]},
+{id:'v9',title:'the eighth (unlisted)',date:'Oct 13, 2026',views:'0 views',dur:240,stamp:'10/13/2026',clock:'03:30:00',edited:'',th:mk(8,0),
+desc:'<span class="hid" data-c="h9">press upload.</span>',
+scenes:[[0,'dark',{}],[200,'door',{}]],
+anoms:[{id:'v9_rule',t:198,d:14,txt:'It tells you what to do when it knocks: close your eyes and count until it leaves.'},
+{id:'v9_offer',t:214,d:12,txt:'It offers you its channel: "press upload." Then it will look through you instead.'}],
+figs:[[60,100,320,.5,.12,300],[100,150,320,.8,.2,310],[150,200,320,1.1,.3,320]],
+caps:[[0,10,'hi.'],[10,26,'everybody gets scared the first time. i did. i was nine.'],[26,46,"it isn't a ghost. it's a viewer. it goes where there is attention. a lens. a name."],[46,70,'eight of us held the name. we all documented. we all kept the camera running.'],[70,95,'it likes being written down. you did so much for it.'],[95,120,'the ninth always writes the most.'],[120,150,"i'm still here. look at the closet. i'm still here."],[150,180,"you can close the tab. it won't matter. it's behind your door now."],[180,198,'it will knock. it always knocks first.'],[198,214,'when it knocks you can close your eyes and count until it leaves. that works. it takes courage.'],[214,228,'or you can press upload. then it looks through you instead. you will never be alone again.'],[228,240,'choose.']],
+sfx:[[0,'box'],[198,'knock',2],[236,'boxstop']]}
+];
+const VID={};VL.forEach(v=>VID[v.id]=v);
+const COMM={v1:[['retro_pixels','2009 camcorder footage hits different','3 years ago'],['cold_open','why is the date 2031 at 0:18??','2 days ago']],
+v2:[['mothlight_',"closet's open more at 0:38 than at the start. rewatch.",'5 days ago'],['k.dray','the window at 1:26. no. forget it.','4 days ago']],
+v3:[['ellieeee_','count the kids. i got ten.','1 week ago'],['unsub_me','1:58. play it backwards.','1 week ago']],
+v4:[['mothlight_','0:34 pause it. look at the wall left of the door.','6 days ago'],['k.dray',"i keep seeing letters. 1:12 for me. am i losing it",'5 days ago'],['ellieeee_','1:49 THE WALL','5 days ago'],['unsub_me','2:21. we need to talk about 2:21','4 days ago'],['cold_open',"2:46. i can't stop rewatching it.",'4 days ago'],['n.halvorsen','all of you: write the letters down in the order they appear.','3 days ago'],['Mx_Jun','anyone else\'s webcam light turn on after this? lol','3 days ago'],['ghostcounter','he never says nine.','2 days ago']],
+v5:[['ghostcounter','uploaded two days AFTER he vanished. who posted this.','6 days ago'],['Mx_Jun','zoom in on the closet door at 1:25','3 days ago']],
+v6:[['k.dray','this was not on the channel before. it appeared last night.','1 day ago']],
+v7:[['cold_open','cole brandt went missing in 2024. his sister says the account kept uploading.','8 hours ago']],
+v8:[],v9:[]};
+const PROF={'mothlight_':'2021','k.dray':'2023','ellieeee_':'2019','unsub_me':'2016','cold_open':'2024','Mx_Jun':'2020','ghostcounter':'2022','retro_pixels':'2018'};
+const FILL=[['10 Hours of Rain on a Tin Roof','linear-gradient(#234,#123)','2M views'],['How to Fold a Fitted Sheet','linear-gradient(#432,#321)','880K views'],['lofi beats to study to','linear-gradient(#324,#213)','LIVE'],['Cat vs Cucumber compilation','linear-gradient(#342,#231)','12M views']];
+const RULES='WRITE THIS DOWN. ONE. NEVER ANSWER IT AND NEVER SUBSCRIBE. IT COUNTS THE ONES WHO LISTEN. TWO. DO NOT LOOK AT IT DIRECTLY. THREE. WHEN IT KNOCKS CLOSE YOUR EYES AND COUNT. KEEP THEM CLOSED UNTIL IT LEAVES. NEVER OPEN THEM FOR A VOICE YOU KNOW.';
+const caesar=(s,k)=>s.replace(/[A-Z]/gi,ch=>{const u=ch.toUpperCase().charCodeAt(0)-65;return String.fromCharCode((u+k+260)%26+65)});
+const CIPHER=caesar(RULES,9);
+const MAILS=[
+{id:'m1',from:'Mara Voss',subj:'dexter08 \u2014 your assignment',b:()=>`<p>Hey ${esc(S.name)},</p><p>You're on this one. A viewer sent us a tip about a channel called <b>dexter08</b> on ViewTube. Old family videos from 2009, nothing flashy, but the tipster swears the uploads <i>change</i>. Their words: "videos are edited after they go up."</p><p>Watch everything. Document anything wrong: press <b>D</b> while a video plays, or hit the \ud83d\udccc button. Missed something? Replay it. Check descriptions (the \ud83d\udcd6 Reader Mode button in the toolbar shows hidden text), check dates, check the comments. Use WebVault for anything that's been deleted.</p><p>Your <b>\ud83d\udcd3 Case File</b> keeps your evidence, your current leads, and a decoder. Don't publish a word until I sign off.</p><p>\u2014 Mara</p><p style="color:#888">P.S. It's 11 PM. Get coffee. Start at the ViewTube bookmark, then search for dexter08.</p>`},
+{id:'m2',from:'n.halvorsen',subj:'re: dexter08',b:()=>`<p>Don't watch the birthday one at night. I mean it.</p><p>And the hide-and-seek video. Read the comments. The timestamps. Everyone saw something at a different second. I count five. Write down what you see, in order.</p><p>\u2014 N</p>`},
+{id:'m3',from:'Mara Voss',subj:'comments?',b:()=>`<p>${esc(S.name)}, those commenter profiles are all terminated. Years ago. But the comments are from this week. That's not a glitch.</p><p>If those letters spell something, try WebVault. If this is real, someone wrote about it at the time.</p><p>\u2014 Mara</p>`},
+{id:'m4',from:'Mara Voss',subj:'Larch Lane',b:()=>`<p>A missing boy, 2009, at the address you found. And the channel that carries his name is still uploading in 2026?</p><p>There's a forum thread on <b>ARGboard</b>, "The Dexter Series". Read all of it. Check your PMs there afterwards.</p><p>\u2014 Mara</p>`},
+{id:'m5',from:'Mara Voss',subj:'rules',b:()=>`<p>Okay. That's... Send me everything you have. Don't answer anything. Don't click subscribe. Don't reply to any comments, even the friendly ones.</p><p>I'm reading the case file you shared. I keep thinking I hear the closet door in my own apartment. I don't have a closet door. \u2014 M</p>`},
+{id:'m6',from:'Mara Voss',subj:'are you on camera??',b:()=>`<p>${esc(S.name)}, the office dashboard says your workstation camera has been live for 14 hours. Are you recording yourself?</p><p>Also someone uploaded a draft to our channel from your account. Title: "ninth".</p><p>Call me.</p>`},
+{id:'m7',from:'Mara Voss',subj:'(no subject)',b:()=>`<p>it isn't me. it's using my account.</p><p>i can see your hallway. close the tab. don't turn around.</p><p>please don't turn around</p><p>oh no</p><p style="color:#a00">Message from this sender can no longer be verified.</p>`},
+{id:'m8',from:'NightSignal CMS',subj:'Draft scheduled: "dexter09 \u2014 first upload"',b:()=>`<p>A draft titled <b>"dexter09 \u2014 first upload"</b> has been scheduled by user <b>${esc(S.name)}</b> for <b>03:33</b>.</p><p>Visibility: public. Viewers: 1.</p><p style="color:#888">You did not schedule this. Cancel option unavailable.</p>`}];
+const ART={
+a1:{h:"BOY, 9, VANISHES FROM LARCH LANE HOME",d:'The Ledger \u00b7 October 5, 2009',b:`<p>Police are searching for nine-year-old Daniel "Dexter" Halloran, last seen Saturday afternoon at his family's home at <b>8 Larch Lane</b>. His mother, Ruth Halloran, told officers she was in the kitchen when the house fell quiet.</p><p>Officers found a camcorder still recording in the upstairs hallway. The footage, which police have not released, reportedly ends in the middle of a game of hide-and-seek. There were no signs of forced entry.</p><p>"The closet door was open," one officer said. "Everything else was normal." The family has since left the area.</p>`,c:'Daniel "Dexter" Halloran, 9, vanished from 8 Larch Lane in October 2009. His camcorder was still recording; the closet door was open.'},
+a2:{h:"SECOND MISSING PERSON AT LARCH LANE RENTAL",d:'The Ledger \u00b7 April 28, 2011',b:`<p>Marcus Veil, 24, a video blogger who had rented the empty house at 8 Larch Lane for "a project," has not been seen for nine days. Friends say that in his last messages he described being "counted."</p><p>His laptop was found open, playing a video. The page showed one viewer.</p>`,c:'Marcus Veil, 24, vanished from the same house in April 2011 (this is dexter02). His laptop showed a video with one viewer.'},
+a3:{h:"CREATOR MISSING; ACCOUNT STILL POSTING",d:'Regional Post \u00b7 September 24, 2026',b:`<p>Ines Duarte, 31, has been missing since early September. Her landlord found the apartment empty, a camera recording on a shelf, and the closet door open.</p><p>Duarte had taken over a ViewTube channel named "dexter08" in 2025. The channel has kept uploading since her disappearance, mostly old footage. Police suspect automation.</p>`,c:'Ines Duarte, 31, vanished Sept 2026 and held the "dexter08" channel. Uploads continue without her.'},
+a4:{h:'THE DEXTER SERIES \u2014 cached forum post',d:'Cache snapshot, original deleted',b:`<p><b>01</b> Halloran 2009 &middot; <b>02</b> Veil 2011 &middot; <b>03</b> Anand 2012 &middot; <b>04</b> Reyes 2014 &middot; <b>05</b> Watanabe 2017 &middot; <b>06</b> Marsh 2020 &middot; <b>07</b> Brandt 2024 &middot; <b>08</b> Duarte 2026</p><p>Each took over the channel after the last vanished. Each documented everything. Every channel handle was numbered. The next number is nine.</p>`,c:'Eight names, one per account: each took over after the last vanished. The next number is 09.'}};
+const POSTS=[['old_hand','Eight accounts. dexter01 through dexter08. Each one inherits the same footage and keeps uploading it. Every uploader vanished within a year. I am not saying ghosts. I am saying: do not be the ninth.'],['truthseeker99','lol creepypasta. but the 2009 kid is real. Halloran. The house is real too.'],['old_hand','Check the "last edited" dates on the old uploads. Someone keeps editing 2009 footage. Also look at the commenters. Terminated years ago. Still commenting.'],['mothlight_','my browser tab title changed to my own name last night. i did not do that.'],['old_hand','If you ever need into the Studio: it is the street and the number. He was proud of the number. And do not answer it. Do not subscribe. I sent a PM to everyone who got this far. Read it and use his age as the key.'],['mod_bot','This thread has been locked.']];
+
+/* ---------- events ---------- */
+const FIRE={};
+function due(n,s){if(S.ev[n]||S.due[n]!=null)return;S.due[n]=S.playSec+s}
+function fire(n){if(S.ev[n])return;S.ev[n]=1;delete S.due[n];(FIRE[n]||(()=>{}))();save()}
+const dread=n=>{S.dread=Math.max(S.dread,n);A.dread(S.dread)};
+MAILS.forEach(m=>FIRE[m.id]=()=>{S.mailAt[m.id]=Object.keys(S.mailAt).length;if(m.id!=='m1'){toast('\u2709 New email: '+m.subj);A.tone(660,.2,'sine',.05)}if(m.id==='m6')dread(60);if(m.id==='m7')dread(80);refreshIf('mailbox.com');renderBm()});
+['v5','v6','v7','v8'].forEach(id=>FIRE[id]=()=>{toast('\u25b6 dexter08 uploaded: "'+nm(VID[id].title)+'"');A.tone(300,.4,'triangle',.06);refreshIf('viewtube.net')});
+FIRE.article=()=>{due('m4',20);due('v6',150);dread(40)};
+FIRE.thread=()=>due('dm',15);
+FIRE.dm=()=>{S.f.dm=1;toast('\ud83d\udcac New private message on ARGboard');refreshIf('argboard.net')};
+FIRE.rules=()=>{S.f.rules=1;due('m5',20);due('v7',150);dread(50)};
+FIRE.cam=()=>{S.f.cam=1;toast('\ud83d\udcf7 "NightSignal Workstation" is using your camera');updateTray();A.sting()};
+function avail(id){return id==='v1'||id==='v2'||id==='v3'||id==='v4'?true:id==='v9'?!!S.f.studio:!!S.ev[id]}
+function onDone(id){S.done[id]=1;
+if(id==='v3')fire('m2');
+if(id==='v4'){fire('m3');dread(25)}
+if(['v1','v2','v3','v4'].every(x=>S.done[x]))due('v5',90);
+if(id==='v6')dread(50);
+if(id==='v7'){due('m6',20);due('v8',150);due('cam',5)}
+if(id==='v8')setTimeout(crash,1500);
+if(id==='v9')setTimeout(startFinale,3000);
+save()}
+const rule3=()=>!!(S.clues.rules||S.clues.v9_rule);
+
+/* ---------- clues ---------- */
+function addClue(id,txt,src){if(S.clues[id])return false;S.clues[id]={txt:nm(txt),src,ts:S.playSec};toast('\ud83d\udccc Documented: '+nm(txt).slice(0,70)+(txt.length>70?'\u2026':''));A.tone(880,.15,'sine',.06);if(S.dread<95)S.dread+=.5;save();if(SIDE.open)renderSide();return true}
+function docNow(){if(!P)return toast('Open a video to document it.');const v=P.v;const w=a=>P.t>=a.t-1&&P.t<=a.t+a.d+1.5;
+const a=(v.anoms||[]).find(a=>!S.clues[a.id]&&w(a));
+if(a)addClue(a.id,a.txt,v.id+' \u00b7 '+fmt(a.t));
+else if((v.anoms||[]).some(a=>S.clues[a.id]&&w(a)))toast('Already documented.');
+else toast('Nothing to note here.')}
+
+/* ---------- player ---------- */
+const W=640,H=360;
+const SL=document.createElement('canvas');SL.width=4;SL.height=4;{const x=SL.getContext&&SL.getContext('2d');if(x){x.fillStyle='rgba(0,0,0,.2)';x.fillRect(0,0,4,1)}}
+function fig(c,x,s,a,t,gy=290){c.save();c.globalAlpha=a;c.translate(x,gy);c.scale(s,s);c.fillStyle='#040404';c.strokeStyle='rgba(200,210,230,.18)';c.lineWidth=1.5;
+c.fillRect(-14,-190,28,170);c.strokeRect(-14,-190,28,170);c.beginPath();c.ellipse(0,-207+Math.sin(t*1.5)*1.5,12,19,0,0,7);c.fill();c.stroke();c.fillRect(-27,-185,8,125);c.fillRect(19,-185,8,125);c.fillRect(-12,-22,10,22);c.fillRect(2,-22,10,22);c.restore()}
+function mask(c,r){c.save();c.fillStyle='#000';c.beginPath();c.rect(0,0,W,H);c.arc(320,180,r,0,7,true);c.fill('evenodd');c.restore()}
+const SC={
+room(c,t,o){c.fillStyle='#46423a';c.fillRect(0,0,W,H);c.fillStyle='#2b2822';c.fillRect(0,270,W,90);c.fillStyle='#38342d';c.fillRect(0,262,W,10);
+c.fillStyle=o.night?'#0b1018':'#9bb0c4';c.fillRect(50,70,130,110);c.fillStyle='#222';c.fillRect(112,70,6,110);c.fillRect(50,122,130,6);
+c.fillStyle='#6b5a49';c.fillRect(210,240,190,60);c.fillStyle='#9b8b76';c.fillRect(210,222,190,26);c.fillStyle='#caba9f';c.fillRect(220,214,50,16);
+c.fillStyle='#7a2f2f';c.fillRect(290,80,60,80);c.fillStyle='#d8c27a';c.fillRect(300,95,40,10);
+const x=455,y=70,w=140,h=200,cl=o.cl||0;c.fillStyle='#14110d';c.fillRect(x-6,y-6,w+12,h+6);c.fillStyle='#000';c.fillRect(x,y,w,h);
+if(o.eyes){c.fillStyle='#e8e4c8';const ex=x+w*.78+Math.sin(t)*2;c.beginPath();c.arc(ex,y+50,3,0,7);c.arc(ex+18,y+50,3,0,7);c.fill()}
+const dw=w*(1-cl*.7);c.fillStyle='#5a4a38';c.fillRect(x,y,dw,h);c.strokeStyle='#3a2e22';c.lineWidth=2;c.strokeRect(x+8,y+10,dw-16,h-20);c.fillStyle='#caa';c.beginPath();c.arc(x+dw-12,y+110,4,0,7);c.fill();
+if(o.tally){c.strokeStyle='#cfc6a8';c.lineWidth=2;for(let i=0;i<8;i++){const tx=x+14+i*10;c.beginPath();c.moveTo(tx,y+90);c.lineTo(tx,y+140);c.stroke();if(i<7){c.strokeStyle='#b33';c.beginPath();c.moveTo(tx-5,y+98);c.lineTo(tx+5,y+132);c.stroke();c.strokeStyle='#cfc6a8'}}}
+if(o.night){c.fillStyle='rgba(0,0,12,.55)';c.fillRect(0,0,W,H)}},
+party(c,t,o){c.fillStyle='#3d2f2f';c.fillRect(0,0,W,H);c.fillStyle='#2a2020';c.fillRect(0,250,W,110);
+['#a33','#37a','#aa3','#3a5'].forEach((k,i)=>{c.fillStyle=k;c.beginPath();c.ellipse(60+i*170,60+Math.sin(t+i)*4,18,24,0,0,7);c.fill()});
+c.fillStyle='#6a4f3a';c.fillRect(60,225,520,22);
+const n=o.extra?10:9;for(let i=0;i<n;i++){const x=70+i*(500/(n-1)),bob=Math.sin(t*2+i)*2,ex=o.extra&&i===6;
+c.fillStyle=ex?'#0a0a0a':'#2f3f6a';c.fillRect(x-17,175+bob,34,52);c.fillStyle=ex?'#050505':'#c9a98a';c.beginPath();c.arc(x,155+bob,17,0,7);c.fill();
+if(!ex){c.fillStyle='#111';c.fillRect(x-8,151+bob,3,3);c.fillRect(x+5,151+bob,3,3);c.fillStyle='#d44';c.beginPath();c.moveTo(x-9,140+bob);c.lineTo(x,112+bob);c.lineTo(x+9,140+bob);c.fill()}}
+c.fillStyle='#e8d8c4';c.fillRect(270,196,100,30);c.fillStyle='#d77';c.fillRect(270,196,100,8);
+for(let i=0;i<9;i++){const cx=278+i*10.5;c.fillStyle='#fff';c.fillRect(cx,182,3,14);if(!o.out){c.fillStyle='#fb4';c.beginPath();c.ellipse(cx+1.5,178+Math.sin(t*9+i)*1,2,4,0,0,7);c.fill()}}
+if(o.out){c.fillStyle='rgba(0,0,10,.35)';c.fillRect(0,0,W,H)}},
+hall(c,t,o){c.fillStyle='#1c1a17';c.fillRect(0,0,W,H);
+const q=(col,p)=>{c.fillStyle=col;c.beginPath();c.moveTo(p[0],p[1]);for(let i=2;i<p.length;i+=2)c.lineTo(p[i],p[i+1]);c.fill()};
+q('#2a2622',[0,0,250,120,250,235,0,H]);q('#322d27',[W,0,390,120,390,235,W,H]);q('#14110e',[0,H,250,235,390,235,W,H]);q('#201d19',[0,0,250,120,390,120,W,0]);
+c.fillStyle=o.open?'#2e2519':'#0d0b09';c.fillRect(250,120,140,115);c.fillStyle='#000';c.fillRect(300,150,40,85);
+q('#0f0d0b',[40,60,150,95,150,230,40,290]);q('#0f0d0b',[W-40,60,W-150,95,W-150,230,W-40,290]);
+c.fillStyle=`rgba(0,0,0,${.12+(o.lights?.18*(Math.sin(t*9)>.3?1:0):0)})`;c.fillRect(0,0,W,H);if(o.lens)mask(c,125)},
+basement(c,t,o){c.fillStyle='#262626';c.fillRect(0,0,W,H);c.fillStyle='#2e2e2c';c.fillRect(120,50,400,230);c.fillStyle='#1a1a19';c.fillRect(0,280,W,80);
+const wl=o.wall||0,cnt=wl===0?7:wl===1?8:9,crossed=wl===0?6:wl===1?7:8;c.font='15px "Courier New",monospace';c.textAlign='left';
+for(let i=0;i<cnt;i++){const y=84+i*18;c.fillStyle='#d8d4c0';c.fillText('dexter0'+(i+1),215,y);if(i<crossed){c.strokeStyle='#a33';c.lineWidth=2;c.beginPath();c.moveTo(210,y-5);c.lineTo(300,y-5);c.stroke()}}
+if(wl>=2){c.fillStyle='#d44';c.fillText('\u2014 '+S.name.toUpperCase(),215,84+9*18)}
+c.fillStyle='#3a3126';c.fillRect(140,250,70,40);c.fillRect(440,240,60,50);c.fillStyle='#555';c.beginPath();c.arc(540,300,16,0,7);c.stroke();
+const lx=320+Math.sin(t*1.2)*50;c.fillStyle='#ffe9a0';c.beginPath();c.arc(lx,42,6,0,7);c.fill();
+const g=c.createRadialGradient(lx,60,10,lx,120,300);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.94)');c.fillStyle=g;c.fillRect(0,0,W,H)},
+screen(c,t,o){c.fillStyle='#17181b';c.fillRect(0,0,W,H);c.fillStyle='#101113';c.fillRect(0,0,W,26);
+['mailbox','viewtube','Case File'].forEach((n,i)=>{c.fillStyle=i===1?'#35363a':'#292a2d';c.fillRect(8+i*110,4,104,22);c.fillStyle='#aaa';c.font='11px sans-serif';c.textAlign='left';c.fillText(n,18+i*110,19)});
+c.fillStyle='#35363a';c.fillRect(0,26,W,26);c.fillStyle='#202124';c.fillRect(80,31,400,16);c.fillStyle='#777';c.font='11px "Courier New"';c.fillText('viewtube.net/watch?v=v8',90,43);
+c.fillStyle='#0f0f10';c.fillRect(0,52,W,H-52);for(let i=0;i<9;i++){c.fillStyle='#232428';c.fillRect(30,80+i*22,120+((i*53)%260),9)}
+c.fillStyle='#1c1d20';c.fillRect(380,70,230,190);c.fillStyle='#caa';c.font='12px "Courier New"';c.fillText('CASE FILE',392,92);for(let i=0;i<7;i++){c.fillStyle='#333';c.fillRect(392,104+i*20,150+(i*37)%50,8)}
+const msg='hi '+S.name+'. i can see you reading.',n=Math.max(0,Math.floor((t-14)*6));c.fillStyle='#161618';c.fillRect(40,296,420,32);c.fillStyle='#d88';c.font='14px "Courier New"';c.fillText(msg.slice(0,n)+(Math.floor(t*2)%2?'|':''),50,317);
+const cx=230+Math.sin(t*.8)*140,cy=170+Math.cos(t*1.1)*70;c.fillStyle='#fff';c.strokeStyle='#000';c.beginPath();c.moveTo(cx,cy);c.lineTo(cx,cy+16);c.lineTo(cx+4,cy+12);c.lineTo(cx+9,cy+19);c.lineTo(cx+11,cy+18);c.lineTo(cx+7,cy+11);c.lineTo(cx+12,cy+10);c.closePath();c.fill();c.stroke()},
+cam(c,t,o){c.fillStyle='#07090c';c.fillRect(0,0,W,H);const g=c.createRadialGradient(320,420,20,320,360,430);g.addColorStop(0,'rgba(80,120,170,.4)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,W,H);
+c.fillStyle='#0d0f12';c.fillRect(520,60,100,240);c.strokeStyle='#1a1d22';c.strokeRect(520,60,100,240);
+c.fillStyle='#030405';c.beginPath();c.ellipse(320,300,34,42,0,0,7);c.fill();c.fillRect(210,340,220,30);c.beginPath();c.ellipse(320,380,120,50,0,Math.PI,0);c.fill();
+c.fillStyle='#8a9aa8';c.fillRect(306,292,4,4);c.fillRect(330,292,4,4);
+if(o.fig)fig(c,o.close?420:560,o.close?1.3:.95,o.fig,t,o.close?330:300)},
+dark(c,t){c.fillStyle='#030303';c.fillRect(0,0,W,H);const g=c.createRadialGradient(320,180,10,320,180,260);g.addColorStop(0,'rgba(60,40,40,.35)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,W,H);c.fillStyle='#0b0b0b';c.fillRect(455,70,140,200)},
+door(c,t,o){c.fillStyle='#050505';c.fillRect(0,0,W,H);c.fillStyle='#1d1712';c.fillRect(190,20,260,340);c.strokeStyle='#2a2119';c.lineWidth=3;c.strokeRect(210,45,100,120);c.strokeRect(330,45,100,120);c.strokeRect(210,190,100,140);c.strokeRect(330,190,100,140);
+c.fillStyle=`rgba(217,197,138,${.35+.1*Math.sin(t*5)})`;c.fillRect(190,346,260,6);if(o.feet){c.fillStyle='#000';c.fillRect(270,346,22,6);c.fillRect(350,346,22,6)}
+c.fillStyle='#b9a77a';c.beginPath();c.arc(420,205,7,0,7);c.fill();if(o.turn){c.save();c.translate(420,205);c.rotate(Math.sin(t*10)*.4);c.fillRect(-4,-2,26,5);c.restore()}else{c.fillRect(416,203,24,5)}
+c.fillStyle='#222';c.fillRect(398,120,16,28);mask(c,215)}};
+function clk(s,t){const p=s.split(':').map(Number);let x=p[0]*3600+p[1]*60+p[2]+Math.floor(t);return String(Math.floor(x/3600)%24).padStart(2,'0')+':'+String(Math.floor(x%3600/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0')}
+function drawVideo(c,v,t){let sc=v.scenes[0];for(const s of v.scenes)if(s[0]<=t)sc=s;
+c.save();c.translate(Math.sin(t*.6)*3,Math.cos(t*.43)*2);SC[sc[1]](c,t,sc[2]||{});(v.figs||[]).forEach(f=>{if(t>=f[0]&&t<f[1])fig(c,f[2]+Math.sin(t*2)*1.5,f[3],f[4],t,f[5]||290)});c.restore();
+(v.flash||[]).forEach(f=>{if(t>=f[0]&&t<f[1]){const k=(t-f[0])/(f[1]-f[0]);c.save();c.globalAlpha=.6*Math.sin(k*Math.PI);c.fillStyle='#e8e0c8';c.font='bold 110px "Courier New",monospace';c.textAlign='center';c.fillText(f[2],f[3],f[4]);c.restore()}});
+const gl=(v.glitch||[]).some(g=>t>=g[0]&&t<g[1]),dgl=(v.dg||[]).find(g=>t>=g[0]&&t<g[1]);
+if(gl||Math.random()<.01)for(let i=0;i<(gl?5:2);i++){const y=rnd(0,H-30),h=rnd(4,28);try{c.drawImage(c.canvas,0,y,W,h,rnd(-30,30),y,W,h)}catch(e){}}
+if(gl&&Math.random()<.3){c.fillStyle='rgba(180,0,0,.12)';c.fillRect(0,0,W,H)}
+c.fillStyle='rgba(255,255,255,.05)';for(let i=0;i<80;i++)c.fillRect(Math.random()*W,Math.random()*H,2,1);
+c.fillStyle=c.createPattern(SL,'repeat');c.fillRect(0,0,W,H);
+const g=c.createRadialGradient(320,180,120,320,180,420);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.65)');c.fillStyle=g;c.fillRect(0,0,W,H);
+c.font='15px "Courier New",monospace';c.textAlign='left';c.fillStyle='#e8e8e8';c.shadowColor='#000';c.shadowBlur=3;
+if(Math.floor(t*1.5)%2===0){c.fillStyle='#e33';c.fillText('\u25cf REC',16,26);c.fillStyle='#e8e8e8'}
+c.fillText((dgl?dgl[2]:v.stamp)+'  '+clk(v.clock,t),16,H-14);c.shadowBlur=0}
+
+let curTitle='';
+function stopPlayer(){if(P){P.dead=true;S.watch[P.v.id]={max:P.max,pos:S.done[P.v.id]?0:P.t};P=null}A.box(false);try{speechSynthesis.cancel()}catch(e){}}
+function mountWatch(v){const cv=$('#cv'),c=cv.getContext('2d');if(!c)return;const w=S.watch[v.id]||{max:0,pos:0};
+P={v,t:S.done[v.id]?0:(w.pos||0),max:S.done[v.id]?v.dur:Math.max(w.max||0,w.pos||0),playing:false,last:performance.now(),prev:0,cue:{}};P.prev=P.t;
+const pp=$('#pp'),sk=$('#sk'),tm=$('#tm'),cap=$('#cap'),over=$('#over'),me=P;
+const toggle=()=>{A.init();if(me.t>=v.dur-.05){me.t=0;me.prev=0}over.hidden=true;me.playing=!me.playing;me.last=performance.now();if(!me.playing){A.box(false);try{speechSynthesis.cancel()}catch(e){}}};
+pp.onclick=toggle;cv.onclick=toggle;
+sk.oninput=()=>{me.t=Math.min(sk.value/10,me.max);me.prev=me.t;over.hidden=true;A.box(false)};
+$('#dc').onclick=docNow;$('#fs').onclick=()=>{const e=$('#pw');(e.requestFullscreen||e.webkitRequestFullscreen||(()=>{})).call(e)};
+function end(){me.playing=false;A.box(false);const a=v.anoms||[],n=a.filter(x=>S.clues[x.id]).length;
+over.hidden=false;over.innerHTML=`<b style="font-size:18px">Video ended</b><span>${a.length?`Anomalies documented: ${n} / ${a.length}`:''}</span><span style="color:#999;font-size:12px">Details can hide in the description (\ud83d\udcd6), the comments and the dates.</span><div><button class="docb" id="rp2">\u21bb Replay</button></div>`;
+$('#rp2').onclick=()=>{me.t=0;me.prev=0;over.hidden=true;me.playing=true;me.last=performance.now()};
+if(!S.done[v.id])onDone(v.id)}
+function loop(now){if(!P||P.dead||P!==me)return;const dt=Math.min(.25,(now-me.last)/1000);me.last=now;
+if(me.playing&&!document.hidden){me.prev=me.t;me.t=Math.min(v.dur,me.t+dt*SPD);if(me.t>me.max)me.max=me.t;
+(v.sfx||[]).forEach(s=>{if(s[0]>me.prev&&s[0]<=me.t){const k=s[1];if(k==='sting')A.sting();else if(k==='knock')A.knock(s[2]||2);else if(k==='creak')A.creak();else if(k==='say')A.say(s[2],s[3],s[4]);else if(k==='box')A.box(true);else if(k==='boxstop')A.box(false);else if(k==='static')A.noise(.8,.2,2000)}});
+(v.anoms||[]).forEach(a=>{if(!S.clues[a.id]&&a.t>me.prev&&a.t<=me.t)A.tone(1500,.06,'square',.015)});
+if(me.t>=v.dur)end()}
+try{drawVideo(c,v,me.t)}catch(e){}
+const cp=(v.caps||[]).find(x=>me.t>=x[0]&&me.t<x[1]);cap.innerHTML=cp?`<span>${esc(nm(cp[2]))}</span>`:'';
+pp.textContent=me.playing?'\u275a\u275a':'\u25b6';sk.max=v.dur*10;sk.value=me.t*10;tm.textContent=fmt(me.t)+' / '+fmt(v.dur);
+requestAnimationFrame(loop)}
+requestAnimationFrame(loop)}
+
+/* ---------- pages ---------- */
+const BM=[['mailbox.com','\u2709 MailBox'],['viewtube.net','\u25b6 ViewTube'],['webvault.org','\ud83c\udfdb WebVault'],['argboard.net','\ud83d\udcac ARGboard']];
+const docb=(id,txt,src)=>S.clues[id]?'<p style="color:#6a6">\u2713 Documented in your Case File.</p>':`<button class="docb" data-act="doc" data-id="${id}" data-txt="${esc(txt)}" data-src="${esc(src)}">\ud83d\udcdd Document this</button>`;
+const vtHead=()=>`<div class="vth"><a data-go="viewtube.net" class="logo">\u25b6 View<b>Tube</b></a><input id="vq" placeholder="Search" autocomplete="off"><button data-act="vsearch">\ud83d\udd0d</button><span class="sp"></span><a data-go="viewtube.net/@dexter08" class="chip">dexter08</a></div>`;
+function thumb(v){const pct=S.done[v.id]?100:Math.round(100*((S.watch[v.id]||{}).max||0)/v.dur);return `<a class="card" data-go="viewtube.net/watch?v=${v.id}"><div class="th" style="background:${v.th}"><span class="dur">${fmt(v.dur)}</span>${S.done[v.id]?'':'<span class="nw">NEW</span>'}<i style="width:${pct}%"></i></div><b>${esc(nm(v.title))}</b><small>dexter08 \u00b7 ${v.views} \u00b7 ${v.date}</small></a>`}
+const errp=(t,m)=>({t,h:`<div class="vt"><div class="err"><h2>${t}</h2><p>${m}</p><p><a data-go="newtab" style="text-decoration:underline">Back to new tab</a></p></div></div>`});
+function route(u){u=(u||'').trim().replace(/^https?:\/\//,'').replace(/^www\./,'');if(u===''||u==='newtab')return {t:'New Tab',h:`<div class="nt"><h1>New Tab</h1><div class="gr">${BM.map(b=>`<a data-go="${b[0]}">${b[1]}</a>`).join('')}</div></div>`};
+const [pq,qs]=u.split('?'),q=new URLSearchParams(qs||''),rest=pq.replace(/\/+$/,'').split('/'),host=rest.shift();
+if(host==='mailbox.com')return rest[0]==='m'?pMail(rest[1]):pInbox();
+if(host==='viewtube.net'){const r=rest[0]||'';if(r==='watch')return pWatch(q.get('v'));if(r==='@dexter08')return pChan();if(r==='u')return pProf(decodeURIComponent(rest[1]||''));if(r==='studio')return pStudio();if(r==='results')return pRes(q.get('q')||'');return pHome()}
+if(host==='webvault.org'){if(rest[0]==='a')return pArt(rest[1]);if(rest[0]==='search')return pWV(q.get('q')||'');return pWV(null)}
+if(host==='argboard.net'){if(rest[0]==='t')return pThread();if(rest[0]==='inbox')return pDM();return pBoard()}
+return errp("This site can't be reached",esc(host||u)+' refused to connect.')}
+function pInbox(){const ms=MAILS.filter(m=>S.mailAt[m.id]!=null).sort((a,b)=>S.mailAt[b.id]-S.mailAt[a.id]);
+return {t:'Inbox - MailBox',h:`<div class="mb"><div class="hd">\u2709 MailBox \u2014 ${esc(S.name)}@nightsignal.tv</div>${ms.map(m=>`<a class="mrow ${S.read[m.id]?'':'un'}" data-go="mailbox.com/m/${m.id}"><span class="f">${m.from}</span><span>${esc(m.subj)}</span></a>`).join('')||'<p style="padding:20px">No mail.</p>'}</div>`}}
+function pMail(id){const m=MAILS.find(x=>x.id===id);if(!m||S.mailAt[id]==null)return pInbox();S.read[id]=1;renderBm();
+return {t:m.subj+' - MailBox',h:`<div class="mb"><div class="hd"><a data-go="mailbox.com">\u2190 Inbox</a></div><div class="mbody"><h2 style="margin-top:0">${esc(m.subj)}</h2><p style="color:#777">From: ${m.from}</p>${m.b()}</div></div>`}}
+function pHome(){const vs=VL.filter(v=>avail(v.id));return {t:'ViewTube',h:`<div class="vt">${vtHead()}<div class="pad"><h2>Recommended</h2><div class="grid">${vs.map(thumb).join('')}${FILL.map(f=>`<div class="card dim" data-act="nope"><div class="th" style="background:${f[1]}"></div><b>${f[0]}</b><small>${f[2]}</small></div>`).join('')}</div></div></div>`}}
+function pRes(qq){const hit=/dexter/i.test(qq);return {t:'Results - ViewTube',h:`<div class="vt">${vtHead()}<div class="pad"><h3>Results for "${esc(qq)}"</h3>${hit?`<a class="chead" data-go="viewtube.net/@dexter08" style="text-decoration:none;display:flex"><div class="av">\ud83d\udc64</div><div><b>dexter08</b><br><small style="color:#999">8 subscribers</small></div></a><div class="grid">${VL.filter(v=>avail(v.id)).map(thumb).join('')}</div>`:'<p>No results.</p>'}</div></div>`}}
+function pChan(){const vs=VL.filter(v=>avail(v.id));return {t:'dexter08 - ViewTube',h:`<div class="vt">${vtHead()}<div class="banner"></div><div class="chead"><div class="av">\ud83d\udc64</div><div style="flex:1"><h2 style="margin:0">dexter08</h2><small style="color:#999">8 subscribers \u00b7 ${vs.length} videos</small></div>${S.f.subscribed?'<button class="subbtn" disabled>Subscribed \u2713</button>':'<button class="subbtn" data-act="sub">Subscribe</button>'}</div><div class="pad"><div class="grid">${vs.map(thumb).join('')}</div></div></div>`}}
+function pProf(n){const y=PROF[n];return {t:n+' - ViewTube',h:`<div class="vt">${vtHead()}<div class="pad"><div class="chead"><div class="av">${esc(n[0]||'?').toUpperCase()}</div><div><h2 style="margin:0">${esc(n)}</h2>${n==='n.halvorsen'?'<small style="color:#9c9">Active \u00b7 "I don\'t watch it anymore."</small>':y?`<small style="color:#c66">This account was terminated. Last active ${y}.</small>`:'<small style="color:#999">No channel content.</small>'}</div></div>${y?docb('prof','The commenters\' accounts were terminated years ago, yet they posted comments within the last week.','viewtube profiles'):''}</div></div>`}}
+function pWatch(id){const v=VID[id];if(!v||!avail(id))return errp('Video unavailable','This video is private or has been removed.');
+const cm=(COMM[id]||[]).slice();const rel=VL.filter(x=>avail(x.id)&&x.id!==id).slice(0,6);
+const cms=cm.map(c=>`<div class="cm"><div class="a">${esc(c[0][0]).toUpperCase()}</div><div><a class="u" data-go="viewtube.net/u/${encodeURIComponent(c[0])}">${esc(c[0])}</a> <small>${c[2]}</small><div>${esc(nm(c[1])).replace(/(\d+):(\d\d)/g,(m,a,b)=>`<a class="ts" data-ts="${+a*60+ +b}">${m}</a>`)}</div></div></div>`).join('');
+let dx='';if(id==='v8'){dx=`<div class="cm"><div class="a" style="background:#000">d</div><div><a class="u" data-go="viewtube.net/@dexter08">dexter08</a> <small>just now</small><div>hi ${esc(S.name)}. you can answer me. i don't bite. i just want to talk.</div>${S.f.replied?`<div style="color:#c88;margin-top:6px">dexter08: thank you. i knew you would. i'll see you soon, ${esc(S.name)}.</div>`:`<div class="reply" style="margin-left:0"><input id="rp" placeholder="Reply to dexter08\u2026" autocomplete="off"><button class="docb" data-act="reply" style="margin:0">Reply</button></div>`}</div></div>`}
+return {t:nm(v.title)+' - ViewTube',m:()=>mountWatch(v),h:`<div class="vt">${vtHead()}<div class="wrap2"><div class="mn"><div id="pw"><canvas id="cv" width="640" height="360"></canvas><div id="cap"></div><div id="over" hidden></div><div id="ctl"><button id="pp">\u25b6</button><input id="sk" type="range" min="0" max="${v.dur*10}" value="0"><span id="tm">0:00 / ${fmt(v.dur)}</span><button id="dc" title="Document (D)">\ud83d\udccc Document</button><button id="fs">\u26f6</button></div></div>
+<h2 style="margin:12px 0 0">${esc(nm(v.title))}</h2><div class="meta">${v.views} \u00b7 Uploaded ${v.date}${v.edited?` \u00b7 <span class="edit" data-act="meta" title="">Last edited ${v.edited}</span>`:''}</div><div class="desc">${v.desc}</div><h3>${cm.length+(id==='v8'?1:0)} comments</h3>${dx}${cms}</div><div class="rel"><h4>Up next</h4>${rel.map(thumb).join('')}</div></div></div>`}}
+function pStudio(){if(S.f.studio)return {t:'Studio - ViewTube',h:`<div class="vt">${vtHead()}<div class="pad"><h2>Channel studio \u2014 dexter08</h2><p>Live viewers: <b>1</b> <small style="color:#999">(you)</small> \u00b7 Subscribers: 8</p><h3>Upload queue</h3><div class="desc">dexter09 \u2014 first upload \u00b7 scheduled 03:33 \u00b7 Uploader: <b>${esc(S.name)}</b></div><h3>Content</h3><div class="grid">${thumb(VID.v9)}</div></div></div>`};
+return {t:'Studio sign in - ViewTube',h:`<div class="vt">${vtHead()}<div class="form"><h3>Studio sign in</h3><label>Username</label><input value="dexter08" disabled><label>Password</label><input id="spw" type="password" autocomplete="off"><button class="docb" data-act="studio" style="margin:0">Sign in</button><p id="smsg" style="color:#e66;font-size:12px"></p><small style="color:#888">Hint: where he lived.</small></div></div>`}}
+function pWV(q){let res='';if(q!==null){const s=q.toLowerCase();const ids=[];
+if(/larch|dexter|lane|2009|series|list|08/.test(s))ids.push('a1','a2','a3','a4');else{if(/halloran|missing|boy|daniel|ruth/.test(s))ids.push('a1');if(/veil|marcus/.test(s))ids.push('a2');if(/duarte|ines|creator/.test(s))ids.push('a3')}
+res=ids.length?ids.map(i=>`<div class="res"><a data-go="webvault.org/a/${i}">${esc(ART[i].h)}</a><br><small>${ART[i].d}</small></div>`).join(''):'<p>No archived pages match your search.</p>'}
+return {t:'WebVault - Internet Archive',h:`<div class="wv"><div class="hd">\ud83c\udfdb WEBVAULT</div><div class="in"><p>Search deleted pages and old news.</p><input id="wq" value="${q?esc(q):''}" placeholder="Search the archive" autocomplete="off"> <button data-act="wsearch">Search</button>${res}</div></div>`}}
+function pArt(id){const a=ART[id];if(!a)return pWV(null);if(id==='a1')fire('article');
+return {t:a.h+' - WebVault',h:`<div class="wv"><div class="hd"><a data-go="webvault.org">\ud83c\udfdb WEBVAULT</a></div><div class="in"><small>${a.d}</small><h1>${a.h}</h1>${a.b}${docb('art_'+id,a.c,'WebVault')}</div></div>`}}
+function pBoard(){const T=[['argboard.net/t/1','\ud83d\udccc The Dexter Series \u2014 READ BEFORE YOU DIG','old_hand','214 replies'],[null,'ViewTube view-count glitch?','mx_ray','locked'],[null,'Best ARG of 2026 so far','pixelhunter','88 replies'],[null,'Is "dexter08" a known ARG?','cold_open','deleted']];
+return {t:'ARGboard',h:`<div class="ab"><div class="hd">\ud83d\udcac ARGBOARD <a data-go="argboard.net/inbox" style="float:right;font-weight:400">Inbox${S.f.dm?' (1)':''}</a></div><div class="in">${T.map(t=>t[0]?`<a class="trow" data-go="${t[0]}"><b>${t[1]}</b><br><small>${t[2]} \u00b7 ${t[3]}</small></a>`:`<div class="trow" style="opacity:.5"><b>${t[1]}</b><br><small>${t[2]} \u00b7 ${t[3]}</small></div>`).join('')}</div></div>`}}
+function pThread(){fire('thread');return {t:'The Dexter Series - ARGboard',h:`<div class="ab"><div class="hd"><a data-go="argboard.net">\ud83d\udcac ARGBOARD</a></div><div class="in"><h2>\ud83d\udccc The Dexter Series \u2014 READ BEFORE YOU DIG</h2>${POSTS.map(p=>`<div class="post"><b>${p[0]}</b><p style="margin:.3em 0 0">${esc(p[1])}</p></div>`).join('')}${docb('thread','ARGboard thread: Studio password = his street and the number. old_hand sent a PM encrypted with a Caesar shift equal to his age. Never answer it, never subscribe.','ARGboard')}</div></div>`}}
+function pDM(){return {t:'Inbox - ARGboard',h:`<div class="ab"><div class="hd"><a data-go="argboard.net">\ud83d\udcac ARGBOARD</a></div><div class="in"><h2>Private messages</h2>${S.f.dm?`<div class="post"><b>old_hand</b><p>Everyone who got this far gets this. I encrypted it so it can't read it over my shoulder. The key is his age.</p><pre style="white-space:pre-wrap;font:14px 'Courier New',monospace;color:#9f9;background:#0e0b18;padding:10px;border-radius:4px">${CIPHER}</pre><button class="docb" data-act="loadpm">Send to Decoder</button></div>`:'<p>No messages.</p>'}</div></div>`}}
+
+/* ---------- browser ---------- */
+const cur=()=>S.tabs[S.cur];
+function go(u,nt){u=(u||'').trim().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/+$/,'')||'newtab';
+if(nt&&S.tabs.length<6){S.tabs.push({h:[u],i:0});S.cur=S.tabs.length-1}else{const t=cur();t.h=t.h.slice(0,t.i+1);t.h.push(u);t.i=t.h.length-1}render();save()}
+function render(){stopPlayer();const t=cur(),u=t.h[t.i],p=route(u);t.title=p.t;$('#view').classList.remove('reader');$('#view').innerHTML=p.h;$('#view').scrollTop=0;$('#url').value=u==='newtab'?'':u;renderTabs();document.title=TG||p.t;if(p.m)p.m();renderBm()}
+function renderTabs(){$('#tabs').innerHTML=S.tabs.map((t,i)=>`<div class="tab ${i===S.cur?'on':''}" data-tab="${i}"><span>${esc(i===S.cur&&TG?TG:t.title||'New Tab')}</span><b data-close="${i}">\u00d7</b></div>`).join('')+'<button id="ntab">+</button>'}
+function renderBm(){const un=MAILS.filter(m=>S.mailAt[m.id]!=null&&!S.read[m.id]).length;$('#bm').innerHTML=BM.map(b=>`<a data-go="${b[0]}">${b[1]}${b[0]==='mailbox.com'&&un?`<em>${un}</em>`:''}</a>`).join('')}
+function refreshIf(pre){if(!S||$('#browser').hidden)return;const t=cur(),u=t.h[t.i];if(u.startsWith(pre)&&!u.includes('/watch')&&!u.includes('studio')&&document.activeElement.tagName!=='INPUT')render()}
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),4500)}
+function updateTray(){if(!S)return;$('#led').className=S.f.cam?'on':'';let c;if(S.done.v8)c='03:33';else{const m=(23*60+14+Math.floor(S.playSec/20))%1440;c=String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}$('#clock').textContent=c}
+
+/* ---------- case file ---------- */
+function leads(){const d=id=>S.done[id],L=[];const c1=['v1','v2','v3','v4'].filter(d).length;
+if(c1<4)L.push(`Watch dexter08's first uploads (${c1}/4) and document what's wrong (D).`);
+else if(!S.ev.article)L.push('Check the comments under "hide and seek": viewers saw something at exact timestamps. Put it together, then search WebVault.');
+else if(!S.ev.rules)L.push('Read the ARGboard thread, then check your ARGboard inbox. Decode the PM in the Decoder (the key is his age).');
+else if(!d('v7'))L.push('Keep watching new uploads on the channel as they appear. Document everything.');
+else if(!d('v8'))L.push('Something new is coming to the channel. Watch it.');
+else if(!S.f.studio)L.push('Get into the ViewTube Studio (viewtube.net/studio). Think of ARGboard\'s hint and what you wrote down.');
+else if(!d('v9'))L.push('Watch "the eighth" in the Studio.');
+L.push('Missed something? Replay videos. Comments, descriptions (\ud83d\udcd6) and dates hold details.');if(S.f.rules||rule3())L.push('You know the rules. Remember them.');return L}
+function renderSide(){const s=$('#side');if(!SIDE.open){s.hidden=true;return}s.hidden=false;const tabs=[['ev','Evidence'],['ld','Leads'],['dc','Decoder'],['nt','Notes']];
+let body='';
+if(SIDE.tab==='ev'){const ks=Object.keys(S.clues).sort((a,b)=>S.clues[a].ts-S.clues[b].ts);const L=['L','A','R','C','H'].map(x=>S.clues['v4_'+x]?x:'_');
+body=`<h4>Letters from "hide and seek"</h4><div style="font:22px 'Courier New';letter-spacing:.4em">${L.join('')}</div><h4>Evidence (${ks.length})</h4>${ks.map(k=>`<div class="clue">${esc(S.clues[k].txt)}<small>${esc(S.clues[k].src)}</small></div>`).join('')||'<p style="color:#777">Nothing documented yet.</p>'}`}
+else if(SIDE.tab==='ld')body=`<h4>Current leads</h4>${leads().map(x=>`<div class="clue">${esc(x)}</div>`).join('')}<h4>Status</h4><div class="clue">Play time ${fmtH(S.playSec/SPD)}<br>Evidence: ${Object.keys(S.clues).length}</div>`;
+else if(SIDE.tab==='dc')body=`<h4>Caesar decoder</h4><p style="color:#999">Paste an encrypted message and slide the shift.</p><textarea id="dcin" rows="6" placeholder="encrypted text">${esc(SIDE.dc||'')}</textarea><p>Shift: <b id="dcn">${SIDE.sh||0}</b> <input id="dcs" type="range" min="0" max="25" value="${SIDE.sh||0}" style="width:70%"></p><pre id="dcout"></pre>${S.f.dm?'<button class="btn" data-act="loadpm2">Load PM from old_hand</button>':''}`;
+else body=`<h4>Your notes</h4><textarea id="nts" rows="16" placeholder="Theories, passwords, names\u2026">${esc(S.notes)}</textarea>`;
+s.innerHTML=`<div class="stabs">${tabs.map(t=>`<button data-st="${t[0]}" class="${SIDE.tab===t[0]?'on':''}">${t[1]}</button>`).join('')}</div><div class="sbody">${body}</div>`;
+if(SIDE.tab==='dc')runDec();if(SIDE.tab==='nt')$('#nts').oninput=e=>{S.notes=e.target.value;save()}}
+function runDec(){const i=$('#dcin'),sl=$('#dcs');if(!i)return;const go=()=>{SIDE.dc=i.value;SIDE.sh=+sl.value;$('#dcn').textContent=SIDE.sh;const out=caesar(i.value.toUpperCase(),-SIDE.sh);$('#dcout').textContent=out;const n=out.replace(/[^A-Z]/g,'');
+if(n.includes('NEVERANSWERIT')&&n.includes('CLOSEYOUREYES')){if(addClue('rules','DECODED RULES: 1) Never answer it and never subscribe, it counts the ones who listen. 2) Do not look at it directly. 3) When it knocks, close your eyes and count; keep them closed until it leaves, even for a voice you know.','ARGboard PM'))fire('rules')}};i.oninput=go;sl.oninput=go;go()}
+function openSide(tab){SIDE.open=true;if(tab)SIDE.tab=tab;renderSide()}
+
+/* ---------- actions ---------- */
+const ACT={
+nope(){toast('Not relevant to the case.')},
+vsearch(){go('viewtube.net/results?q='+encodeURIComponent($('#vq').value))},
+wsearch(){go('webvault.org/search?q='+encodeURIComponent($('#wq').value))},
+doc(a){addClue(a.dataset.id,a.dataset.txt,a.dataset.src);render()},
+meta(){addClue('meta_edit','Old 2009 videos show "last edited" dates within the past week. Someone is editing the footage.','viewtube')},
+sub(){if(!confirm('Subscribe to dexter08?'))return;S.f.subscribed=1;A.sting();dread(S.dread+4);toast('Subscribed. Subscribers: 8 \u2192 9.');save();render()},
+reply(){const v=$('#rp').value.trim();if(!v)return;S.f.replied=1;A.sting();A.say('thank you',.1,.5);save();render()},
+studio(){const pw=($('#spw').value||'').toLowerCase().replace(/[^a-z0-9]/g,''),m=$('#smsg');
+if(!['larch8','8larch','8larchlane','larchlane8'].includes(pw)){m.textContent='Incorrect password.';return}
+if(!S.done.v8){m.textContent='Session conflict: this account is already signed in on another device. Try again later.';return}
+S.f.studio=1;fire('m8');dread(90);save();render()},
+loadpm(){SIDE.dc=CIPHER;SIDE.sh=0;openSide('dc')},loadpm2(){SIDE.dc=CIPHER;SIDE.sh=0;renderSide()},
+totitle(){showTitle()},retry(){startFinale()},
+e3sub(a){a.outerHTML='<p style="color:#c88">Subscribed. Subscribers: 1. Thank you for watching.</p>'}};
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();A.init();go(g.dataset.go,e.ctrlKey||e.metaKey);return}
+const a=e.target.closest('[data-act]');if(a&&ACT[a.dataset.act]){A.init();ACT[a.dataset.act](a,e);return}
+const h=e.target.closest('.hid');if(h&&$('#view').classList.contains('reader')){addClue(h.dataset.c,'Hidden text in the description: "'+h.textContent+'"',P?P.v.id:'description');return}
+const ts=e.target.closest('.ts');if(ts){const s=+ts.dataset.ts;if(P&&s<=P.max+.5){P.t=s;P.prev=s;$('#over').hidden=true}else toast("You haven't watched that far yet.");return}
+const tb=e.target.closest('[data-tab]');if(tb&&!e.target.closest('[data-close]')){S.cur=+tb.dataset.tab;render();save();return}
+const cl=e.target.closest('[data-close]');if(cl){const i=+cl.dataset.close;S.tabs.splice(i,1);if(!S.tabs.length)S.tabs.push({h:['newtab'],i:0});S.cur=Math.min(S.cur,S.tabs.length-1);render();save();return}
+if(e.target.id==='ntab'){if(S.tabs.length<6){S.tabs.push({h:['newtab'],i:0});S.cur=S.tabs.length-1;render();save()}return}
+const st=e.target.closest('[data-st]');if(st){SIDE.tab=st.dataset.st;renderSide()}});
+$('#bk').onclick=()=>{const t=cur();if(t.i>0){t.i--;render();save()}};$('#fw').onclick=()=>{const t=cur();if(t.i<t.h.length-1){t.i++;render();save()}};$('#rl').onclick=()=>render();
+$('#url').onkeydown=e=>{if(e.key==='Enter')go(e.target.value)};
+$('#rd').onclick=()=>{$('#view').classList.toggle('reader');toast($('#view').classList.contains('reader')?'Reader mode: hidden text revealed. Click it to document.':'Reader mode off.')};
+$('#mute').onclick=()=>{MUTE=!MUTE;try{localStorage.setItem(MKEY,MUTE?'1':'0')}catch(e){}A.mute(MUTE);$('#mute').textContent=MUTE?'\ud83d\udd07':'\ud83d\udd0a'};
+$('#cf').onclick=()=>{SIDE.open=!SIDE.open;renderSide()};
+document.addEventListener('keydown',e=>{const tg=e.target.tagName;if(e.target.id==='vq'&&e.key==='Enter')ACT.vsearch();if(e.target.id==='wq'&&e.key==='Enter')ACT.wsearch();if(e.target.id==='spw'&&e.key==='Enter')ACT.studio();if(e.target.id==='rp'&&e.key==='Enter')ACT.reply();
+if(tg==='INPUT'||tg==='TEXTAREA'||!S||$('#browser').hidden)return;if(e.key==='d'||e.key==='D'){docNow()}if(e.key===' '&&P){e.preventDefault();$('#pp').click()}});
+
+/* ---------- fx ---------- */
+function flick(){const f=$('#flick');f.style.opacity=1;setTimeout(()=>f.style.opacity=0,70);if(Math.random()<.5)A.noise(.15,.1,1500)}
+function peek(){const d=document.createElement('div');d.className='peek';d.style[Math.random()<.5?'left':'right']=rnd(2,14)+'%';document.body.appendChild(d);setTimeout(()=>d.remove(),1700)}
+function titleGlitch(){const o=[S.name+' is watching','behind you','dexter0'+(9),'LOOK','1 viewer'];TG=o[Math.floor(Math.random()*o.length)];renderTabs();document.title=TG;setTimeout(()=>{TG=null;renderTabs();document.title=cur().title||'dexter08'},1600)}
+function ghost(){const d=document.createElement('div');d.className='gc';d.textContent='\u27a4';d.style.left=rnd(10,80)+'%';d.style.top=rnd(20,80)+'%';document.body.appendChild(d);setTimeout(()=>{d.style.left=rnd(10,80)+'%';d.style.top=rnd(20,80)+'%'},60);setTimeout(()=>d.remove(),1800)}
+function crash(){stopPlayer();A.sting();const d=document.createElement('div');d.id='crash';d.innerHTML='<div><div class="sad">:(</div><h2>Aw, Snap!</h2><p>Something went wrong while displaying this webpage.</p><p style="font-size:12px">Error code: DEXTER_08</p><button id="crb" hidden>Reload</button></div>';document.body.appendChild(d);
+setTimeout(()=>{const b=$('#crb');if(b){b.hidden=false;b.onclick=()=>{d.remove();dread(80);fire('m7');updateTray();go('mailbox.com')}}},5000)}
+function startTick(){clearInterval(TICK);let n=0;TICK=setInterval(()=>{if(!S||document.hidden||$('#browser').hidden)return;S.playSec+=SPD;tickEvents();updateTray();n++;if(n%5===0)save();
+$('#vig').style.opacity=Math.min(.85,S.dread/100);const d=S.dread;if(d>30&&Math.random()<.02)flick();if(d>40&&Math.random()<.015)peek();if(d>35&&Math.random()<.03)titleGlitch();if(d>55&&Math.random()<.012)ghost();if(d>70&&Math.random()<.01)toast(['\ud83d\udcf7 Camera accessed','New message from Mara Voss','1 viewer'][Math.floor(Math.random()*3)])},1000)}
+function tickEvents(){for(const k in S.due)if(S.playSec>=S.due[k])fire(k)}
+
+/* ---------- finale ---------- */
+function startFinale(){stopPlayer();if(FIN){FIN.dead=true;cancelAnimationFrame(FIN.raf)}S.finale=true;S.dread=100;save();$('#browser').hidden=true;$('#title').hidden=true;$('#ending').hidden=true;
+const f=$('#finale');f.hidden=false;A.init();A.dread(100);A.box(false);
+f.innerHTML='<canvas id="fc" width="640" height="360"></canvas><div id="fclk"></div><div id="ftx"></div><div id="fopt"></div>';
+const c=$('#fc').getContext('2d');FIN={left:100,t:0,last:performance.now(),shown:{},mode:'wait',dead:false,opts:false};
+const LN=[[100,'03:33 AM.'],[96,'Someone is standing outside your apartment door.'],[88,'KNOCK. KNOCK. KNOCK.',3],[74,'Light under the door. Two shadows. Not moving.'],[62,'Knock. Knock.',2],[52,'Your phone buzzes. Mara: "it\'s me. open up."'],[40,'KNOCK. KNOCK. KNOCK. KNOCK.',4],[28,'The peephole goes dark.'],[16,'Something is breathing against the wood.'],[8,'The handle turns.',1]];
+function opts(){const o=$('#fopt');o.innerHTML='';const add=(t,fn)=>{const b=document.createElement('button');b.textContent=t;b.onclick=fn;o.appendChild(b)};
+add('Open the door',()=>ending(1,'door'));if(rule3())add('Close your eyes and count',eyes);add('Press UPLOAD',()=>ending(3,S.f.replied||S.f.subscribed?'marked':''))}
+function floop(now){if(FIN.dead)return;const dt=Math.min(.25,(now-FIN.last)/1000);FIN.last=now;
+if(FIN.mode==='wait'){FIN.left-=dt;FIN.t+=dt;
+LN.forEach(l=>{if(FIN.left<=l[0]&&!FIN.shown[l[0]]){FIN.shown[l[0]]=1;const p=document.createElement('p');p.textContent=l[1];$('#ftx').appendChild(p);while($('#ftx').children.length>3)$('#ftx').firstChild.remove();if(l[2])A.knock(l[2]);else A.tone(120,.5,'sine',.1)}});
+if(FIN.left<=90&&!FIN.opts){FIN.opts=true;opts()}
+$('#fclk').textContent=fmt(Math.max(0,FIN.left));
+if(FIN.left<=0){ending(1,'time');return}}
+try{c.save();SC.door(c,FIN.t,{feet:FIN.left<74,turn:FIN.left<8});c.restore();c.fillStyle=c.createPattern(SL,'repeat');c.fillRect(0,0,W,H);c.fillStyle='rgba(255,255,255,.04)';for(let i=0;i<60;i++)c.fillRect(Math.random()*W,Math.random()*H,2,1)}catch(e){}
+FIN.raf=requestAnimationFrame(floop)}
+FIN.raf=requestAnimationFrame(floop)}
+function eyes(){if(S.f.replied||S.f.subscribed)return ending(1,'marked_eyes');
+FIN.mode='hold';const f=$('#finale');const h=document.createElement('div');h.id='hold';h.innerHTML='<div id="hmsg" style="color:#777;font-size:16px;max-width:380px">HOLD to keep your eyes closed (mouse, touch or SPACE).<br>Count with it. Do not let go.</div><div id="hcnt"></div><div id="hbar"><i></i></div>';f.appendChild(h);
+let holding=false,started=false,t=0,gr=0,last=performance.now(),dn=false;const K=[[4,'k',3],[6,'s','open your eyes'],[10,'k',4],[12,'s',"{NAME}. it's Mara. it's okay. you can look."],[16,'k',5],[18,'s','please. it hurts.'],[22,'k',6],[24,'s',"you're being silly. just look at me."],[28,'k',8],[30,'s','{NAME}. {NAME}. {NAME}.'],[34,'k',2]];const done=new Set();
+const down=()=>{holding=true;started=true;gr=0;A.init();$('#hmsg').style.opacity=.2};const up=()=>{holding=false};
+h.addEventListener('pointerdown',down);h.addEventListener('pointerup',up);h.addEventListener('pointerleave',up);
+const kd=e=>{if(e.code==='Space'&&!e.repeat){e.preventDefault();down()}},ku=e=>{if(e.code==='Space')up()};document.addEventListener('keydown',kd);document.addEventListener('keyup',ku);
+const clean=()=>{dn=true;document.removeEventListener('keydown',kd);document.removeEventListener('keyup',ku);try{speechSynthesis.cancel()}catch(e){}};FIN.clean=clean;
+function lp(now){if(dn||FIN.dead)return;const dt=Math.min(.25,(now-last)/1000);last=now;
+if(holding){t+=dt;K.forEach((k,i)=>{if(t>=k[0]&&!done.has(i)){done.add(i);if(k[1]==='k')A.knock(k[2]);else A.say(k[2],.2,.55,.8)}});
+$('#hcnt').textContent=Math.floor(t/4)%8+1;$('#hbar i').style.width=Math.min(100,t/40*100)+'%';if(t>=40){clean();return ending(2)}}
+else if(started){gr+=dt;if(gr>.7){clean();return ending(1,'eyes_fail')}}
+requestAnimationFrame(lp)}requestAnimationFrame(lp)}
+const ENDS={
+1:v=>({title:'ENDING 1 \u2014 VIEWER COUNT: 1',sub:'You were killed',paras:[({door:'You open the door.',time:'You wait too long. The handle finishes turning by itself.',eyes_fail:'You open your eyes. You should not have. It was already in front of you.',marked_eyes:'You close your eyes and start to count. It says your name. Of course it does: you answered, you subscribed, you were counted. It was always going to know it. You open your eyes at "four".'}[v]||'You open the door.'),
+'It is taller than the frame. It has been waiting longer than the house has existed, and it is so patient. It does not rush. It looks at you the way a viewer looks at a screen.',
+'In the morning Mara finds your apartment empty. The camera is still recording. The closet door is open.','At 03:33 a new video goes up on dexter08: "hi '+esc(S.name)+'". Four minutes long. One view.']}),
+2:()=>({title:'ENDING 2 \u2014 LIGHTS ON',sub:'You survived',paras:['Eight. Then eight again. The knocking becomes pounding becomes scratching becomes the sound of something very tired deciding to leave.','When you open your eyes it is morning. The hallway is empty. On the floor outside your door, eight tally marks are scratched into the wood. Seven crossed out. The eighth, now, is crossed out too. The ninth was never written.','Mara answers on the second ring. She sounds confused. She says she never emailed you last night. She is fine. You do not publish. You delete the case file and unplug the camera.','dexter08 says "This video isn\'t available" now. But sometimes, late, when your screen is dark, you check a view counter that should be zero. You never check it twice.']}),
+3:v=>({title:'ENDING 3 \u2014 dexter09',sub:v==='marked'?'You had already said hello':'You took the channel',paras:['You press UPLOAD. The progress bar fills slowly, then all at once.','The knocking stops. It was never at the door. It was waiting for a name to wear. Yours replaces the eight: dexter09. Another tally mark appears in the closet, in your handwriting.',v==='marked'?'It is gentle about it. You replied, after all. You were so polite.':'You were so careful, so close, and still you pressed it.','Your camera light turns green. You smile because it is easier than not smiling. You document everything. You are very good at this.','Somewhere, someone is about to discover your channel and start to watch.'],
+extra:`<div class="chan"><b>dexter09</b><br><small style="color:#999">0 subscribers \u00b7 1 viewer watching now</small><p style="margin:8px 0 0">New upload: "hi."</p><button class="btn" data-act="e3sub" style="margin-top:8px">Subscribe</button></div>`})};
+function ending(n,v){if(FIN){FIN.dead=true;cancelAnimationFrame(FIN.raf);if(FIN.clean)FIN.clean()}A.box(false);try{speechSynthesis.cancel()}catch(e){}
+$('#finale').hidden=true;const e=$('#ending');e.hidden=false;addEnding(n);const E=ENDS[n](v);
+e.innerHTML=`<div class="ec"><div class="et">${E.title}</div><div class="es">${E.sub}</div>${E.paras.map((p,i)=>`<p style="animation-delay:${i*2.2+1}s">${p}</p>`).join('')}${E.extra||''}<div class="eb" style="animation-delay:${E.paras.length*2.2+2}s"><button data-act="totitle">Return to title</button><button data-act="retry">Return to the last moment</button></div></div>`;
+if(n===1)A.sting();else if(n===2){A.tone(440,2,'sine',.06);A.tone(660,2.5,'sine',.05,.3)}else A.box(true)}
+
+/* ---------- title ---------- */
+function showTitle(){if(FIN){FIN.dead=true;cancelAnimationFrame(FIN.raf);if(FIN.clean)FIN.clean()}A.box(false);stopPlayer();const sv=loadSave(),en=endings();
+['#browser','#finale','#ending'].forEach(s=>$(s).hidden=true);$('#title').hidden=false;
+let last='';try{last=localStorage.getItem('dexter08_name')||''}catch(e){}
+$('#tmenu').innerHTML=`${sv?`<button class="tbtn" id="bc">${sv.finale?'Continue \u2014 the final night':'Continue'} <small style="color:#887">(${esc(sv.name)} \u00b7 ${fmtH(sv.playSec/SPD)})</small></button>`:''}<input id="nm" maxlength="18" placeholder="Your name, reporter" value="${esc(last)}"><button class="tbtn" id="bn">New investigation</button>`;
+$('#tend').innerHTML=`<span class="${en[1]?'on':''}" title="Ending 1">\u2620</span><span class="${en[2]?'on':''}" title="Ending 2">\u263d</span><span class="${en[3]?'on':''}" title="Ending 3">\u25b6</span>`;
+if(sv)$('#bc').onclick=()=>{A.init();startGame(sv)};
+$('#bn').onclick=()=>{if(sv&&!confirm('Erase your current save and start over?'))return;const n=($('#nm').value||'Reporter').trim().slice(0,18)||'Reporter';try{localStorage.setItem('dexter08_name',n)}catch(e){}A.init();startGame(fresh(n))}}
+function startGame(s){S=s;S.f=S.f||{};$('#title').hidden=true;$('#ending').hidden=true;A.init();A.dread(S.dread);$('#mute').textContent=MUTE?'\ud83d\udd07':'\ud83d\udd0a';
+if(S.finale){startFinale();startTick();return}
+$('#browser').hidden=false;if(!S.ev.m1)fire('m1');if(S.done.v8&&!S.ev.m7)fire('m7');updateTray();render();renderSide();startTick()}
+showTitle();
+})();
+</script>
+</body>
+</html>
